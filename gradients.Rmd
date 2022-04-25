@@ -1,0 +1,248 @@
+---
+title: "Untitled"
+author: "Ryan Miller"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(glmnet)
+library(dplyr)
+library(plotly)
+library(ggplot2)
+```
+
+```{r}
+costFunction <- function(X,Y,THETA){
+  m = length(Y)
+  h = X %*% THETA
+  J = 1/m %*% t(y - h) %*% (y - h)
+  return(J)
+}
+gradient_descent <- function(X,Y,THETA,alpha=0.0005,num_iters=1000){
+  J_HIST = rep(0, num_iters)
+  theta_0_hist = c()
+  theta_1_hist = c()
+  
+  for (i in 1:num_iters){
+    J_HIST[i] = costFunction(X,Y,THETA)
+    theta_0_hist <- append(theta_0_hist,
+                           THETA[0])
+    theta_1_hist <- append(theta_1_hist,
+                           THETA[1])
+    
+    # GRAD function
+    h = X %*% THETA
+    gradient = t(X) %*% (h-Y)
+    THETA <- THETA - alpha * gradient
+  }
+  return (list(THETA=THETA, J_HIST=J_HIST, theta_0_hist=theta_0_hist, theta_1_hist=theta_1_hist))
+}
+```
+
+```{r}
+costFunctionRidge <- function(X,Y,THETA, lambda=10){
+  m = length(Y)
+  h = X %*% THETA
+  J_REG = lambda * sum(THETA^2)
+  J = 1/m %*% t(y - h) %*% (y - h) 
+  J = J + J_REG
+  return(J)
+}
+gradient_descent_Ridge <- function(X,Y,THETA,alpha=0.0005,lambda=10,num_iters=1000){
+  print(THETA)
+  J_HIST = rep(0, num_iters)
+  theta_0_hist = c()
+  theta_1_hist = c()
+  
+  for (i in 1:num_iters){
+    J_HIST[i] = costFunctionRidge(X,Y,THETA)
+    theta_0_hist <- append(theta_0_hist,
+                           THETA[1])
+    theta_1_hist <- append(theta_1_hist,
+                           THETA[2])
+    
+    # GRAD function
+    h = X %*% THETA
+    gradient = (t(X) %*% (h-Y)) 
+    gradient = gradient + lambda * THETA
+    THETA <- THETA - alpha * gradient
+  }
+  return (list(THETA=THETA, J_HIST=J_HIST, theta_0_hist=theta_0_hist, theta_1_hist=theta_1_hist))
+}
+```
+
+```{r}
+costFunctionLasso <- function(X,Y,THETA, lambda=10){
+  m = length(Y)
+  h = X %*% THETA
+  J_REG = lambda * sum(abs(THETA))
+  J = 1/m %*% t(y - h) %*% (y - h)
+  J = J + J_REG
+  return(J)
+}
+gradient_descent_Lasso <- function(X,Y,THETA,alpha=0.0005,lambda=10,num_iters=1000){
+  J_HIST = rep(0, num_iters)
+  theta_0_hist = c()
+  theta_1_hist = c()
+  
+  for (i in 1:num_iters){
+    J_HIST[i] = costFunctionLasso(X,Y,THETA)
+    theta_0_hist <- append(theta_0_hist,
+                           THETA[1])
+    theta_1_hist <- append(theta_1_hist,
+                           THETA[2])
+    
+    # GRAD function
+    h = X %*% THETA
+    gradient = (t(X) %*% (h-Y))
+    gradient = gradient + lambda * THETA
+    THETA <- THETA - alpha * gradient
+  }
+  return (list(THETA=THETA, J_HIST=J_HIST, theta_0_hist=theta_0_hist, theta_1_hist=theta_1_hist))
+}
+```
+
+```{r}
+costFunctionElNet <- function(X,Y,THETA, lambda=10){
+  m = length(Y)
+  h = X %*% THETA
+  J_REG = lambda * ((0.25 * sum(THETA^2)) + (0.5 * sum(abs(THETA))))
+  J = 1/m %*% t(y - h) %*% (y - h)
+  J = J + J_REG
+  return(J)
+}
+gradient_descent_ElNet <- function(X,Y,THETA,alpha=0.0005,lambda=10,num_iters=1000){
+  J_HIST = rep(0, num_iters)
+  theta_0_hist = c()
+  theta_1_hist = c()
+  
+  for (i in 1:num_iters){
+    J_HIST[i] = costFunctionElNet(X,Y,THETA)
+    theta_0_hist <- append(theta_0_hist,
+                           THETA[1])
+    theta_1_hist <- append(theta_1_hist,
+                           THETA[2])
+    
+    # GRAD function
+    h = X %*% THETA
+    gradient = (t(X) %*% (h-Y))
+    gradient = gradient + lambda * THETA
+    THETA <- THETA - alpha * gradient
+  }
+  return (c(THETA, J_HIST, theta_0_hist, theta_1_hist))
+}
+```
+
+```{r}
+x = seq(from=0, to=1, length.out=400)
+noise = 1 * runif(400)
+y = sin(x * 1.5 * pi)
+y_noise = as.vector(y + noise)
+y_noise = y_noise - mean(y_noise)
+```
+
+```{r}
+X = t(rbind(2*x, x^2))
+T0 = pracma::meshgrid(seq(-10,10,length.out=100),seq(-10,10,length.out=100))$X
+T1 = pracma::meshgrid(seq(-10,10,length.out=100),seq(-10,10,length.out=100))$Y
+dim(T0) <- c(1,10000)
+dim(T1) <- c(1,10000)
+T0 <- t(T0)
+T1 <- t(T1)
+Ts = cbind(T0,T1)
+
+zs = as.matrix(apply(Ts,1,FUN=function(i) costFunction(X,y_noise,i)))
+zr = as.matrix(apply(Ts,1,FUN=function(i) costFunctionRidge(X,y_noise,i)))
+zl = as.matrix(apply(Ts,1,FUN=function(i) costFunctionLasso(X,y_noise,i)))
+ze = as.matrix(apply(Ts,1,FUN=function(i) costFunctionElNet(X,y_noise,i)))
+
+dim(T0) <- c(100,100)
+dim(T1) <- c(100,100)
+dim(zs) <- c(100,100)
+dim(zr) <- c(100,100)
+dim(zl) <- c(100,100)
+dim(ze) <- c(100,100)
+T0 <- t(T0)
+T1 <- t(T1)
+zs <- t(zs)
+zr <- t(zr)
+zl <- t(zl)
+ze <- t(ze)
+
+```
+
+```{r}
+fig <- plot_ly(showscale=FALSE) 
+fig <- fig %>% add_surface(x=T0,y=T1,z=zs, name="OLS")
+fig <- fig %>% add_surface(x=T0,y=T1,z=zr, name="Ridge")
+fig <- fig %>% add_surface(x=T0,y=T1,z=zl, name="Lasso")
+fig <- fig %>% add_surface(x=T0,y=T1,z=ze, name="ElNet")
+fig
+```
+```{r}
+res <- gradient_descent_Ridge(X,y_noise,as.vector(c(7.,10.)), alpha = 0.8,lambda = 10, num_iters=5000)
+# theta_result_reg,J_history_reg, theta_0, theta_1 = 
+```
+
+```{r}
+ggplot(data.frame(
+  x = pracma::Reshape(T0,10000,1),
+  y = pracma::Reshape(T1,10000,1),
+  z = pracma::Reshape(zs,10000,1)
+), aes(x = x, y = y, z = z)) +
+  
+  scale_y_continuous(limits = c(-10,0)) +
+  scale_x_continuous(limits = c(0,5)) +
+  geom_contour_filled()
+```
+
+```{r}
+ggplot(data.frame(
+  x = pracma::Reshape(T0,10000,1),
+  y = pracma::Reshape(T1,10000,1),
+  z = pracma::Reshape(zr,10000,1)
+), aes(x = x, y = y, z = z)) +
+  geom_contour_filled()
+```
+
+```{r}
+ggplot(data.frame(
+  x = pracma::Reshape(T0,10000,1),
+  y = pracma::Reshape(T1,10000,1),
+  z = pracma::Reshape(zl,10000,1)
+), aes(x = x, y = y, z = z)) +
+  geom_contour_filled()
+```
+
+```{r}
+ggplot(data.frame(
+  x = pracma::Reshape(T0,10000,1),
+  y = pracma::Reshape(T1,10000,1),
+  z = pracma::Reshape(ze,10000,1)
+), aes(x = x, y = y, z = z)) +
+  geom_contour_filled()
+```
+
+
+$$L=(Y-\beta X)'(Y-\beta X) + \lambda |\beta|\\ 
+\frac{\partial L}{\partial \beta}=-2X'Y+2\beta X'X+\lambda I=0\\ 
+\text{because }|\beta| \text{ has no derivative, we must consider the sign of }\beta:\ s_j\\ 
+\text{Since }X'Y=\hat{\beta}^{OLS}\text{ and } X'X=I\\ 
+-2\hat{\beta}^{OLS}+2\beta+\lambda s_j=0\\ 
+\text{considering where }\beta_j=0\\
+-2\hat{\beta}^{OLS}+\lambda s_j=0\\ 
+\text{implying }|\hat{\beta}^{OLS}|\le\frac{\lambda}{2}\text{ where }\beta_j=0
+$$
+$$
+L=(Y-X\beta)'(Y-X\beta)+\lambda\beta^2\\
+\frac{\partial L}{\partial \beta}=-2X'Y+2\beta X'X+2\beta\lambda=0\\
+\beta=X'Y/(X'X+\lambda I)
+$$
+\begin{equation}
+
+\end{equation}
+
