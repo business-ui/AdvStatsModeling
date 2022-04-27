@@ -34,6 +34,10 @@ Methods:
 ### Not Explored / Out of Scope
 - Outliers and outlier handling
 - Heteroskedasticity
+- Usage of Prior Lasso for Time Series Analysis (incorporating prior data in loss function)
+- Usage of Fused Lasso for Time Series Analysis (differencing between X_t and X_{t-1})
+- Usage of Grouped Lasso for penalizing design matrices X_j with covariates beta_j over K groups
+- Usage of Adaptive Lasso for proportional hazards
 - Model Fit with chi-square tests for OLS and Exp(1) for Regularization as per <i>A significance test for the lasso.</i>[[1]](#1)</cite>
 
 <a id="1">[1]</a> Lockhart, R., Taylor, J., Tibshirani, R. J., & Tibshirani, R. (2014). A significance test for the lasso. Annals of statistics, 42(2), 413.
