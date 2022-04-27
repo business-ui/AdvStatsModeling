@@ -33,6 +33,6 @@ Methods:
 ### Not Explored / Out of Scope
 - Outliers and outlier handling
 - Heteroskedasticity
-- Model Fit with chi-square tests for OLS and Exp(1) for Regularization as per <cite>[A significance test for the lasso.][1]</cite>
+- Model Fit with chi-square tests for OLS and Exp(1) for Regularization as per <i>A significance test for the lasso.</i>[[1]](#1)</cite>
 
-[1]: Lockhart, R., Taylor, J., Tibshirani, R. J., & Tibshirani, R. (2014). A significance test for the lasso. Annals of statistics, 42(2), 413.
+<a id="1">[1]</a> Lockhart, R., Taylor, J., Tibshirani, R. J., & Tibshirani, R. (2014). A significance test for the lasso. Annals of statistics, 42(2), 413.
