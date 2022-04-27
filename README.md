@@ -29,3 +29,10 @@ Methods:
 - ![project.R](https://github.com/business-ui/AdvStatsModeling/blob/main/project.R) I conducted the training of the OLS, Lasso, Ridge, and Elastic Net models using parallel CPU processing. This was done for Gaussian Regression and Binomial Regression. 
 - ![project-functions.R](https://github.com/business-ui/AdvStatsModeling/blob/main/project-functions.R) This is the source file for calculating AIC, BIC, # of coefficients, the best R-squared values for desired models, RMSE, MAPE, and MSPE for Gaussian models. It also contains methods for finding the confusion matrix and other binomial regression results.
 - ![project-loader.R](https://github.com/business-ui/AdvStatsModeling/blob/main/project-loader.R) Only use this once you've saved your models to .RData files. This will avoid going through all of the model training again.
+
+### Not Explored / Out of Scope
+- Outliers and outlier handling
+- Heteroskedasticity
+- Model Fit with chi-square tests for OLS and Exp(1) for Regularization as per <cite>[A significance test for the lasso.][1]</cite>
+
+[1]: Lockhart, R., Taylor, J., Tibshirani, R. J., & Tibshirani, R. (2014). A significance test for the lasso. Annals of statistics, 42(2), 413.
