@@ -1,6 +1,9 @@
 # AdvStatsModeling
 Work I did for my STA 6257 capstone project regarding Regularized Regression.
 
+### Presentation ![Presentation.pptx](https://github.com/business-ui/AdvStatsModeling/blob/main/Presentation.pptx)
+The presentation given to the class and professor explaining the concept of Regularized Regression.
+
 ### Simple Example ![simple-example.R](https://github.com/business-ui/AdvStatsModeling/blob/main/simple-example.R)
 Summary: I explored the LifeCycleSavings dataset using Gaussian Regression and regularization methods.  
 <br />
